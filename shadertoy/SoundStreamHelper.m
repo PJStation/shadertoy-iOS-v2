@@ -114,10 +114,13 @@ static  void TapProcess(MTAudioProcessingTapRef tap, CMItemCount numberFrames, M
     //Convert the fft data to dB
     vDSP_zvmags(&context->split, 1, context->tempBuffer, 1, context->numSamples/2);
     
-    
+    //Convert the fft data to dB, db = 10*log10f(magnitude) or 20*log10f(magnitude开方)
+
     //In order to avoid taking log10 of zero, an adjusting factor is added in to make the minimum value equal -128dB
     //      vDSP_vsadd(obtainedReal, 1, &kAdjust0DB, obtainedReal, 1, frameCount/2);
-    vDSP_vdbcon(context->tempBuffer, 1, &one, context->tempBuffer, 1, context->numSamples/2, 0);
+    //Performs the following operation. α is 20 if F is 1, or 10 if F is 0.
+    unsigned int F = 0;
+    vDSP_vdbcon(context->tempBuffer, 1, &one, context->tempBuffer, 1, context->numSamples/2, F);
     
     // min decibels is set to -100
     // max decibels is set to -30
